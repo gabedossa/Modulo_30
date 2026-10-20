@@ -137,8 +137,8 @@ public class VendaServiceTest {
     public void deveBuscarVendaPorCodigo() throws SQLException {
         service.cadastrar(criarVenda("V1"));
 
-        assertNotNull(service.buscarPorCodigo("v1"));
-        assertNull(service.buscarPorCodigo("V99"));
+        assertNotNull(service.consultar("v1"));
+        assertNull(service.consultar("V99"));
     }
 
     @Test
@@ -267,6 +267,25 @@ public class VendaServiceTest {
         service.excluir("V1");
 
         assertTrue(service.buscarTodos().isEmpty());
+    }
+
+    @Test
+    public void deveAtualizarVendaIniciada() throws SQLException {
+        Venda venda = service.cadastrar(criarVenda("V1"));
+        venda.adicionarProduto(criarProduto("TECLADO", "120.00"), 1);
+
+        service.atualizar(venda);
+
+        assertEquals(2, service.consultar("V1").getProdutos().size());
+        assertValor("220.00", service.consultar("V1").getValorTotal());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void naoDeveAtualizarVendaConcluida() throws SQLException {
+        Venda venda = service.cadastrar(criarVenda("V1"));
+        service.finalizar("V1");
+
+        service.atualizar(venda);
     }
 
     @Test(expected = IllegalArgumentException.class)

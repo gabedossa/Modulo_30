@@ -2,7 +2,7 @@ package br.com.ebac.domain;
 
 import java.math.BigDecimal;
 
-public class Produto {
+public class Produto implements Persistente {
 
     private Long id;
     private String codigo;
@@ -10,10 +10,12 @@ public class Produto {
     private String descricao;
     private BigDecimal valor;
 
+    @Override
     public Long getId() {
         return id;
     }
 
+    @Override
     public void setId(Long id) {
         this.id = id;
     }

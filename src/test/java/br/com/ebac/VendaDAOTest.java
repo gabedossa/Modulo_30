@@ -51,7 +51,7 @@ public class VendaDAOTest {
     @After
     public void limpar() throws SQLException {
         for (String codigo : new String[]{CODIGO_VENDA_1, CODIGO_VENDA_2}) {
-            Venda venda = vendaDAO.buscarPorCodigo(codigo);
+            Venda venda = vendaDAO.consultar(codigo);
             if (venda != null) {
                 vendaDAO.excluir(venda);
             }
@@ -100,7 +100,7 @@ public class VendaDAOTest {
         Venda venda = criarVenda(CODIGO_VENDA_1);
         vendaDAO.cadastrar(venda);
 
-        Venda salva = vendaDAO.buscarPorCodigo(CODIGO_VENDA_1);
+        Venda salva = vendaDAO.consultar(CODIGO_VENDA_1);
 
         assertNotNull(salva);
         assertEquals(venda.getId(), salva.getId());
@@ -116,7 +116,7 @@ public class VendaDAOTest {
 
     @Test
     public void deveRetornarNuloQuandoCodigoNaoExiste() throws SQLException {
-        assertNull(vendaDAO.buscarPorCodigo(CODIGO_VENDA_1));
+        assertNull(vendaDAO.consultar(CODIGO_VENDA_1));
     }
 
     @Test
@@ -141,7 +141,7 @@ public class VendaDAOTest {
 
         assertEquals(Integer.valueOf(1), vendaDAO.atualizar(venda));
 
-        Venda atualizada = vendaDAO.buscarPorCodigo(CODIGO_VENDA_1);
+        Venda atualizada = vendaDAO.consultar(CODIGO_VENDA_1);
         assertEquals(Venda.Status.CONCLUIDA, atualizada.getStatus());
         assertEquals(1, atualizada.getProdutos().size());
         assertEquals(Integer.valueOf(3), atualizada.buscarItem("TESTE-MOUSE").getQuantidade());
@@ -155,6 +155,6 @@ public class VendaDAOTest {
         vendaDAO.cadastrar(venda);
 
         assertEquals(Integer.valueOf(1), vendaDAO.excluir(venda));
-        assertNull(vendaDAO.buscarPorCodigo(CODIGO_VENDA_1));
+        assertNull(vendaDAO.consultar(CODIGO_VENDA_1));
     }
 }

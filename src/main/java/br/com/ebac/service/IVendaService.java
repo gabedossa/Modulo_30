@@ -1,17 +1,11 @@
 package br.com.ebac.service;
 
 import br.com.ebac.domain.Venda;
+import br.com.ebac.service.generic.IGenericService;
 
 import java.sql.SQLException;
-import java.util.List;
 
-public interface IVendaService {
-
-    Venda cadastrar(Venda venda) throws SQLException;
-
-    Venda buscarPorCodigo(String codigo) throws SQLException;
-
-    List<Venda> buscarTodos() throws SQLException;
+public interface IVendaService extends IGenericService<Venda, String> {
 
     Venda adicionarProduto(String codigoVenda, String codigoProduto, Integer quantidade) throws SQLException;
 
@@ -20,6 +14,4 @@ public interface IVendaService {
     Venda finalizar(String codigoVenda) throws SQLException;
 
     Venda cancelar(String codigoVenda) throws SQLException;
-
-    void excluir(String codigoVenda) throws SQLException;
 }

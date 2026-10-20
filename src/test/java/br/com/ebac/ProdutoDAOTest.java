@@ -25,7 +25,7 @@ public class ProdutoDAOTest {
     @After
     public void limpar() throws SQLException {
         for (String codigo : new String[]{CODIGO_1, CODIGO_2}) {
-            Produto produto = dao.buscarPorCodigo(codigo);
+            Produto produto = dao.consultar(codigo);
             if (produto != null) {
                 dao.excluir(produto);
             }
@@ -60,7 +60,7 @@ public class ProdutoDAOTest {
         Produto produto = criarProduto(CODIGO_1);
         dao.cadastrar(produto);
 
-        Produto salvo = dao.buscarPorCodigo(CODIGO_1);
+        Produto salvo = dao.consultar(CODIGO_1);
 
         assertNotNull(salvo);
         assertEquals(produto.getId(), salvo.getId());
@@ -72,7 +72,7 @@ public class ProdutoDAOTest {
 
     @Test
     public void deveRetornarNuloQuandoCodigoNaoExiste() throws SQLException {
-        assertNull(dao.buscarPorCodigo(CODIGO_1));
+        assertNull(dao.consultar(CODIGO_1));
     }
 
     @Test
@@ -97,7 +97,7 @@ public class ProdutoDAOTest {
 
         assertEquals(Integer.valueOf(1), dao.atualizar(produto));
 
-        Produto atualizado = dao.buscarPorCodigo(CODIGO_1);
+        Produto atualizado = dao.consultar(CODIGO_1);
         assertEquals("Notebook Gamer", atualizado.getNome());
         assertEquals("Notebook 32GB", atualizado.getDescricao());
         assertEquals(new BigDecimal("5999.90"), atualizado.getValor());
@@ -109,6 +109,6 @@ public class ProdutoDAOTest {
         dao.cadastrar(produto);
 
         assertEquals(Integer.valueOf(1), dao.excluir(produto));
-        assertNull(dao.buscarPorCodigo(CODIGO_1));
+        assertNull(dao.consultar(CODIGO_1));
     }
 }

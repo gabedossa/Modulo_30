@@ -24,7 +24,7 @@ public class ClienteDAOTest {
     @After
     public void limpar() throws SQLException {
         for (String cpf : new String[]{CPF_1, CPF_2}) {
-            Cliente cliente = dao.buscarPorCpf(cpf);
+            Cliente cliente = dao.consultar(cpf);
             if (cliente != null) {
                 dao.excluir(cliente);
             }
@@ -62,7 +62,7 @@ public class ClienteDAOTest {
         Cliente cliente = criarCliente(CPF_1);
         dao.cadastrar(cliente);
 
-        Cliente salvo = dao.buscarPorCpf(CPF_1);
+        Cliente salvo = dao.consultar(CPF_1);
 
         assertNotNull(salvo);
         assertEquals(cliente.getId(), salvo.getId());
@@ -77,7 +77,7 @@ public class ClienteDAOTest {
 
     @Test
     public void deveRetornarNuloQuandoCpfNaoExiste() throws SQLException {
-        assertNull(dao.buscarPorCpf(CPF_1));
+        assertNull(dao.consultar(CPF_1));
     }
 
     @Test
@@ -105,7 +105,7 @@ public class ClienteDAOTest {
 
         assertEquals(Integer.valueOf(1), dao.atualizar(cliente));
 
-        Cliente atualizado = dao.buscarPorCpf(CPF_1);
+        Cliente atualizado = dao.consultar(CPF_1);
         assertEquals("Gabriel Vinces", atualizado.getNome());
         assertEquals("Campinas", atualizado.getCidade());
         assertEquals("Av. Brasil", atualizado.getEndereco());
@@ -120,6 +120,6 @@ public class ClienteDAOTest {
         dao.cadastrar(cliente);
 
         assertEquals(Integer.valueOf(1), dao.excluir(cliente));
-        assertNull(dao.buscarPorCpf(CPF_1));
+        assertNull(dao.consultar(CPF_1));
     }
 }

@@ -38,7 +38,7 @@ public class ClienteServiceTest {
         Cliente cliente = service.cadastrar(criarCliente("11111111111"));
 
         assertNotNull(cliente.getId());
-        assertNotNull(service.buscarPorCpf("11111111111"));
+        assertNotNull(service.consultar("11111111111"));
     }
 
     @Test
@@ -56,12 +56,12 @@ public class ClienteServiceTest {
     public void deveBuscarPorCpfComMascara() throws SQLException {
         service.cadastrar(criarCliente("11111111111"));
 
-        assertNotNull(service.buscarPorCpf("111.111.111-11"));
+        assertNotNull(service.consultar("111.111.111-11"));
     }
 
     @Test
     public void deveRetornarNuloQuandoCpfNaoExiste() throws SQLException {
-        assertNull(service.buscarPorCpf("99999999999"));
+        assertNull(service.consultar("99999999999"));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -121,7 +121,7 @@ public class ClienteServiceTest {
 
         service.atualizar(cliente);
 
-        assertEquals("Campinas", service.buscarPorCpf("11111111111").getCidade());
+        assertEquals("Campinas", service.consultar("11111111111").getCidade());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -151,7 +151,7 @@ public class ClienteServiceTest {
 
         service.excluir("11111111111");
 
-        assertNull(service.buscarPorCpf("11111111111"));
+        assertNull(service.consultar("11111111111"));
     }
 
     @Test(expected = IllegalArgumentException.class)

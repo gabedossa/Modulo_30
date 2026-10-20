@@ -36,7 +36,7 @@ public class ProdutoServiceTest {
         Produto produto = service.cadastrar(criarProduto("P1"));
 
         assertNotNull(produto.getId());
-        assertNotNull(service.buscarPorCodigo("P1"));
+        assertNotNull(service.consultar("P1"));
     }
 
     @Test
@@ -44,12 +44,12 @@ public class ProdutoServiceTest {
         Produto produto = service.cadastrar(criarProduto("  p1 "));
 
         assertEquals("P1", produto.getCodigo());
-        assertNotNull(service.buscarPorCodigo("p1"));
+        assertNotNull(service.consultar("p1"));
     }
 
     @Test
     public void deveRetornarNuloQuandoCodigoNaoExiste() throws SQLException {
-        assertNull(service.buscarPorCodigo("P99"));
+        assertNull(service.consultar("P99"));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -104,7 +104,7 @@ public class ProdutoServiceTest {
 
         service.atualizar(produto);
 
-        assertEquals(new BigDecimal("2999.90"), service.buscarPorCodigo("P1").getValor());
+        assertEquals(new BigDecimal("2999.90"), service.consultar("P1").getValor());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -134,7 +134,7 @@ public class ProdutoServiceTest {
 
         service.excluir("P1");
 
-        assertNull(service.buscarPorCodigo("P1"));
+        assertNull(service.consultar("P1"));
     }
 
     @Test(expected = IllegalArgumentException.class)

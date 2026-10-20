@@ -1,6 +1,6 @@
 package br.com.ebac.domain;
 
-public class Cliente {
+public class Cliente implements Persistente {
 
     private Long id;
     private String nome;
@@ -11,10 +11,12 @@ public class Cliente {
     private Integer casaNumero;
     private String tel;
 
+    @Override
     public Long getId() {
         return id;
     }
 
+    @Override
     public void setId(Long id) {
         this.id = id;
     }

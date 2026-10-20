@@ -2,13 +2,13 @@
 
 Projeto Java do curso de Back-end da **EBAC** que implementa um pequeno sistema de vendas em camadas
 (**domínio → DAO → service**), persistindo os dados no **PostgreSQL** via **JDBC puro** e coberto por
-**100 testes JUnit**.
+**102 testes JUnit**.
 
 ![Java](https://img.shields.io/badge/Java-8-ED8B00?logo=openjdk&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-JDBC%2042.7-4169E1?logo=postgresql&logoColor=white)
 ![Maven](https://img.shields.io/badge/Maven-build-C71A36?logo=apachemaven&logoColor=white)
 ![JUnit](https://img.shields.io/badge/JUnit-4.13-25A162?logo=junit5&logoColor=white)
-![Testes](https://img.shields.io/badge/testes-100%20passando-brightgreen)
+![Testes](https://img.shields.io/badge/testes-102%20passando-brightgreen)
 
 ---
 
@@ -59,15 +59,77 @@ src
 ├── main
 │   ├── java/br/com/ebac
 │   │   ├── App.java                   # testa a conexão com o banco
-│   │   ├── domain/                    # Cliente, Produto, Venda, ProdutoQuantidade
-│   │   ├── dao/                       # interfaces + implementações JDBC
+│   │   ├── domain/                    # Persistente, Cliente, Produto, Venda, ProdutoQuantidade
+│   │   ├── dao/                       # DAOs de cliente, produto e venda
+│   │   │   ├── generic/               # IGenericDAO e GenericDAO (CRUD JDBC reaproveitado)
 │   │   │   └── jdbc/ConnectionFactory # abre a conexão com o PostgreSQL
 │   │   └── service/                   # validações e regras de negócio
+│   │       └── generic/               # IGenericService e GenericService
 │   └── resources
 │       └── script.sql                 # criação das tabelas
 └── test/java/br/com/ebac
     ├── *Test.java                     # testes de domínio, DAO e service
-    └── *DAOMock.java                  # DAOs em memória usados nos testes de service
+    └── *DAOMock.java                  # DAOs em memória (GenericDAOMock) usados nos testes de service
+```
+
+### Arquitetura com generics
+
+O CRUD é escrito uma única vez em classes genéricas, e cada entidade só informa o que tem de específico.
+
+```mermaid
+classDiagram
+    direction LR
+    class Persistente {
+        <<interface>>
+        getId() Long
+        setId(Long)
+    }
+    class IGenericDAO~T, E~ {
+        <<interface>>
+        cadastrar(T) Integer
+        consultar(E) T
+        buscarTodos() List~T~
+        atualizar(T) Integer
+        excluir(T) Integer
+    }
+    class GenericDAO~T, E~ {
+        <<abstract>>
+        getTabela()*
+        getColunaChave()*
+        getColunas()*
+        preencherParametros()*
+        converter()*
+    }
+    class GenericService~T, E~ {
+        <<abstract>>
+        validar(T)*
+        getChave(T)*
+        normalizarChave(E)*
+    }
+    IGenericDAO <|.. GenericDAO
+    GenericDAO <|-- ClienteDAO
+    GenericDAO <|-- ProdutoDAO
+    GenericDAO <|-- VendaDAO
+    GenericService --> IGenericDAO : usa
+    GenericService <|-- ClienteService
+    GenericService <|-- ProdutoService
+    GenericService <|-- VendaService
+```
+
+- **`T extends Persistente`**: a entidade (`Cliente`, `Produto`, `Venda`), que sempre tem um `id`.
+- **`E extends Serializable`**: a chave de negócio usada em `consultar` — o **CPF** do cliente e o **código** do produto e da venda.
+- **`GenericDAO`** monta o SQL de insert, select, update e delete a partir da tabela e das colunas, e roda cadastro e atualização em transação.
+- **`GenericService`** aplica as regras comuns: registro não nulo, chave sem duplicidade e existência antes de atualizar ou excluir.
+
+Exemplo — tudo o que o `ProdutoDAO` precisa dizer:
+
+```java
+public class ProdutoDAO extends GenericDAO<Produto, String> implements IProdutoDAO {
+    protected String getTabela()      { return "tb_produto"; }
+    protected String getColunaChave() { return "codigo"; }
+    protected String[] getColunas()   { return new String[]{"codigo", "nome", "descricao", "valor"}; }
+    // + preencherParametros(...) e converter(...)
+}
 ```
 
 ### Modelo de dados

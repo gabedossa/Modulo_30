@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Venda {
+public class Venda implements Persistente {
 
     public enum Status {
         INICIADA, CONCLUIDA, CANCELADA
@@ -66,10 +66,12 @@ public class Venda {
         this.valorTotal = total;
     }
 
+    @Override
     public Long getId() {
         return id;
     }
 
+    @Override
     public void setId(Long id) {
         this.id = id;
     }
