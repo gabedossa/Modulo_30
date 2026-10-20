@@ -1,5 +1,6 @@
 package br.com.ebac.service.generic;
 
+import br.com.ebac.anotacao.AnotacaoUtil;
 import br.com.ebac.dao.generic.IGenericDAO;
 import br.com.ebac.domain.Persistente;
 
@@ -22,7 +23,10 @@ public abstract class GenericService<T extends Persistente, E extends Serializab
     /** Valida e normaliza a entidade; lança IllegalArgumentException se algo estiver errado. */
     protected abstract void validar(T entidade) throws SQLException;
 
-    protected abstract E getChave(T entidade);
+    /** Valor do atributo marcado com @TipoChave. */
+    protected E getChave(T entidade) {
+        return AnotacaoUtil.getValorChave(entidade);
+    }
 
     protected abstract E normalizarChave(E chave);
 

@@ -9,41 +9,18 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Grava a venda em tb_venda e os itens em tb_produto_quantidade, sempre na mesma transação.
- * Na exclusão, os itens são apagados pelo ON DELETE CASCADE.
- */
+
 public class VendaDAO extends GenericDAO<Venda, String> implements IVendaDAO {
 
     private final ClienteDAO clienteDAO = new ClienteDAO();
     private final ProdutoDAO produtoDAO = new ProdutoDAO();
 
     @Override
-    protected String getTabela() {
-        return "tb_venda";
-    }
-
-    @Override
-    protected String getColunaChave() {
-        return "codigo";
-    }
-
-    @Override
-    protected String[] getColunas() {
-        return new String[]{"codigo", "cliente_id", "valor_total", "data_venda", "status"};
-    }
-
-    @Override
-    protected void preencherParametros(PreparedStatement stm, Venda venda) throws SQLException {
-        stm.setString(1, venda.getCodigo());
-        stm.setLong(2, venda.getCliente().getId());
-        stm.setBigDecimal(3, venda.getValorTotal());
-        stm.setTimestamp(4, Timestamp.valueOf(venda.getDataVenda()));
-        stm.setString(5, venda.getStatus().name());
+    public Class<Venda> getTipoClasse() {
+        return Venda.class;
     }
 
     @Override
@@ -62,13 +39,9 @@ public class VendaDAO extends GenericDAO<Venda, String> implements IVendaDAO {
     }
 
     @Override
-    protected Venda converter(Connection connection, ResultSet rs) throws SQLException {
-        Venda venda = new Venda();
-        venda.setId(rs.getLong("id"));
-        venda.setCodigo(rs.getString("codigo"));
-        venda.setValorTotal(rs.getBigDecimal("valor_total"));
-        venda.setDataVenda(rs.getTimestamp("data_venda").toLocalDateTime());
-        venda.setStatus(Venda.Status.valueOf(rs.getString("status")));
+    public Venda converter(Connection connection, ResultSet rs) throws SQLException {
+        // os campos simples vêm das annotations; cliente e itens são buscados à parte
+        Venda venda = super.converter(connection, rs);
         venda.setCliente(buscarCliente(connection, rs.getLong("cliente_id")));
         venda.setProdutos(buscarItens(connection, venda.getId()));
         return venda;

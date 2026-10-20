@@ -1,14 +1,35 @@
 package br.com.ebac.domain;
 
+import br.com.ebac.anotacao.ColunaTabela;
+import br.com.ebac.anotacao.Tabela;
+import br.com.ebac.anotacao.TipoChave;
+
+@Tabela("tb_cliente")
 public class Cliente implements Persistente {
 
+    @ColunaTabela(dbName = "id", setJavaName = "setId")
     private Long id;
+
+    @ColunaTabela(dbName = "nome", setJavaName = "setNome")
     private String nome;
+
+    @TipoChave
+    @ColunaTabela(dbName = "cpf", setJavaName = "setCpf")
     private String cpf;
+
+    @ColunaTabela(dbName = "cidade", setJavaName = "setCidade")
     private String cidade;
+
+    @ColunaTabela(dbName = "endereco", setJavaName = "setEndereco")
     private String endereco;
+
+    @ColunaTabela(dbName = "estado", setJavaName = "setEstado")
     private String estado;
+
+    @ColunaTabela(dbName = "casa_numero", setJavaName = "setCasaNumero")
     private Integer casaNumero;
+
+    @ColunaTabela(dbName = "tel", setJavaName = "setTel")
     private String tel;
 
     @Override

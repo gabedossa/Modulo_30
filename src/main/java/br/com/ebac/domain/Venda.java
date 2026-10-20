@@ -1,22 +1,39 @@
 package br.com.ebac.domain;
 
+import br.com.ebac.anotacao.ColunaTabela;
+import br.com.ebac.anotacao.Tabela;
+import br.com.ebac.anotacao.TipoChave;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Tabela("tb_venda")
 public class Venda implements Persistente {
 
     public enum Status {
         INICIADA, CONCLUIDA, CANCELADA
     }
 
+    @ColunaTabela(dbName = "id", setJavaName = "setId")
     private Long id;
+
+    @TipoChave
+    @ColunaTabela(dbName = "codigo", setJavaName = "setCodigo")
     private String codigo;
+
+    @ColunaTabela(dbName = "cliente_id", setJavaName = "setCliente")
     private Cliente cliente;
     private List<ProdutoQuantidade> produtos = new ArrayList<>();
+
+    @ColunaTabela(dbName = "valor_total", setJavaName = "setValorTotal")
     private BigDecimal valorTotal = BigDecimal.ZERO;
+
+    @ColunaTabela(dbName = "data_venda", setJavaName = "setDataVenda")
     private LocalDateTime dataVenda;
+
+    @ColunaTabela(dbName = "status", setJavaName = "setStatus")
     private Status status;
 
     public void adicionarProduto(Produto produto, Integer quantidade) {

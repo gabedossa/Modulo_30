@@ -122,11 +122,6 @@ public class VendaService extends GenericService<Venda, String> implements IVend
     }
 
     @Override
-    protected String getChave(Venda venda) {
-        return venda.getCodigo();
-    }
-
-    @Override
     protected String normalizarChave(String codigo) {
         return codigo == null ? "" : codigo.trim().toUpperCase();
     }

@@ -32,11 +32,6 @@ public class ProdutoService extends GenericService<Produto, String> implements I
     }
 
     @Override
-    protected String getChave(Produto produto) {
-        return produto.getCodigo();
-    }
-
-    @Override
     protected String normalizarChave(String codigo) {
         return codigo == null ? "" : codigo.trim().toUpperCase();
     }

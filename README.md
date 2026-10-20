@@ -2,13 +2,13 @@
 
 Projeto Java do curso de Back-end da **EBAC** que implementa um pequeno sistema de vendas em camadas
 (**domínio → DAO → service**), persistindo os dados no **PostgreSQL** via **JDBC puro** e coberto por
-**102 testes JUnit**.
+**109 testes JUnit**.
 
 ![Java](https://img.shields.io/badge/Java-8-ED8B00?logo=openjdk&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-JDBC%2042.7-4169E1?logo=postgresql&logoColor=white)
 ![Maven](https://img.shields.io/badge/Maven-build-C71A36?logo=apachemaven&logoColor=white)
 ![JUnit](https://img.shields.io/badge/JUnit-4.13-25A162?logo=junit5&logoColor=white)
-![Testes](https://img.shields.io/badge/testes-102%20passando-brightgreen)
+![Testes](https://img.shields.io/badge/testes-109%20passando-brightgreen)
 
 ---
 
@@ -59,6 +59,7 @@ src
 ├── main
 │   ├── java/br/com/ebac
 │   │   ├── App.java                   # testa a conexão com o banco
+│   │   ├── anotacao/                  # @Tabela, @ColunaTabela, @TipoChave e AnotacaoUtil
 │   │   ├── domain/                    # Persistente, Cliente, Produto, Venda, ProdutoQuantidade
 │   │   ├── dao/                       # DAOs de cliente, produto e venda
 │   │   │   ├── generic/               # IGenericDAO e GenericDAO (CRUD JDBC reaproveitado)
@@ -94,16 +95,12 @@ classDiagram
     }
     class GenericDAO~T, E~ {
         <<abstract>>
-        getTabela()*
-        getColunaChave()*
-        getColunas()*
-        preencherParametros()*
-        converter()*
+        getTipoClasse()* Class~T~
+        converter(Connection, ResultSet) T
     }
     class GenericService~T, E~ {
         <<abstract>>
         validar(T)*
-        getChave(T)*
         normalizarChave(E)*
     }
     IGenericDAO <|.. GenericDAO
@@ -118,19 +115,50 @@ classDiagram
 
 - **`T extends Persistente`**: a entidade (`Cliente`, `Produto`, `Venda`), que sempre tem um `id`.
 - **`E extends Serializable`**: a chave de negócio usada em `consultar` — o **CPF** do cliente e o **código** do produto e da venda.
-- **`GenericDAO`** monta o SQL de insert, select, update e delete a partir da tabela e das colunas, e roda cadastro e atualização em transação.
+- **`GenericDAO`** lê as annotations da entidade e monta sozinho o SQL de insert, select, update e delete; cadastro e atualização rodam em transação.
 - **`GenericService`** aplica as regras comuns: registro não nulo, chave sem duplicidade e existência antes de atualizar ou excluir.
 
-Exemplo — tudo o que o `ProdutoDAO` precisa dizer:
+### Mapeamento com annotations
+
+As entidades dizem como são gravadas no banco por meio de três annotations próprias (pacote `br.com.ebac.anotacao`):
+
+| Annotation | Onde | Para quê |
+|---|---|---|
+| `@Tabela("tb_cliente")` | classe | nome da tabela |
+| `@ColunaTabela(dbName = "casa_numero", setJavaName = "setCasaNumero")` | atributo | coluna no banco e setter usado ao ler o registro |
+| `@TipoChave` | atributo | chave de negócio usada em `consultar` e na checagem de duplicidade |
 
 ```java
-public class ProdutoDAO extends GenericDAO<Produto, String> implements IProdutoDAO {
-    protected String getTabela()      { return "tb_produto"; }
-    protected String getColunaChave() { return "codigo"; }
-    protected String[] getColunas()   { return new String[]{"codigo", "nome", "descricao", "valor"}; }
-    // + preencherParametros(...) e converter(...)
+@Tabela("tb_cliente")
+public class Cliente implements Persistente {
+
+    @ColunaTabela(dbName = "id", setJavaName = "setId")
+    private Long id;
+
+    @TipoChave
+    @ColunaTabela(dbName = "cpf", setJavaName = "setCpf")
+    private String cpf;
+
+    @ColunaTabela(dbName = "casa_numero", setJavaName = "setCasaNumero")
+    private Integer casaNumero;
+    // ...
 }
 ```
+
+Com isso, um DAO só precisa dizer qual é a sua entidade:
+
+```java
+public class ClienteDAO extends GenericDAO<Cliente, String> implements IClienteDAO {
+
+    @Override
+    public Class<Cliente> getTipoClasse() {
+        return Cliente.class;
+    }
+}
+```
+
+Atributos que apontam para outra entidade (como o `cliente` da `Venda`, na coluna `cliente_id`) são gravados pelo `id`.
+O `VendaDAO` completa a leitura buscando o cliente e os itens da venda.
 
 ### Modelo de dados
 
@@ -216,6 +244,7 @@ mvn test
 | Camada | Arquivos | Usa o banco? |
 |---|---|---|
 | Domínio | `ClienteTest`, `ProdutoTest`, `ProdutoQuantidadeTest`, `VendaTest` | Não |
+| Annotations | `AnotacaoTest` (tabelas, chaves e se todo `setJavaName` existe) | Não |
 | DAO | `ClienteDAOTest`, `ProdutoDAOTest`, `VendaDAOTest`, `ConnectionFactoryTest` | Sim |
 | Service | `ClienteServiceTest`, `ProdutoServiceTest`, `VendaServiceTest` | Não (usa mocks em memória) |
 

@@ -36,11 +36,6 @@ public class ClienteService extends GenericService<Cliente, String> implements I
     }
 
     @Override
-    protected String getChave(Cliente cliente) {
-        return cliente.getCpf();
-    }
-
-    @Override
     protected String normalizarChave(String cpf) {
         return cpf == null ? "" : cpf.replaceAll("\\D", "");
     }

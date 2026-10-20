@@ -1,11 +1,20 @@
 package br.com.ebac.domain;
 
+import br.com.ebac.anotacao.ColunaTabela;
+import br.com.ebac.anotacao.Tabela;
+
 import java.math.BigDecimal;
 
+@Tabela("tb_produto_quantidade")
 public class ProdutoQuantidade {
 
+    @ColunaTabela(dbName = "produto_id", setJavaName = "setProduto")
     private Produto produto;
+
+    @ColunaTabela(dbName = "quantidade", setJavaName = "setQuantidade")
     private Integer quantidade;
+
+    @ColunaTabela(dbName = "valor_total", setJavaName = "setValorTotal")
     private BigDecimal valorTotal;
 
     public ProdutoQuantidade() {
