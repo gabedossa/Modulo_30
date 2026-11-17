@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +12,9 @@ import factory.ConnectionFactory;
 import model.Cliente;
 
 public class ClienteDaoImpl implements ClienteDAO {
+
+    private static final String COLUNAS = "id, nome, cpf, tel, endereco, numero, cidade, estado, email, qtd_compras";
+
     @Override
     public Integer cadastrar(Cliente cli) throws Exception {
         Connection conn = null;
@@ -19,7 +23,7 @@ public class ClienteDaoImpl implements ClienteDAO {
         try {
             conn = ConnectionFactory.getConnection();
             stm = conn.prepareStatement(getSqlInsert(), Statement.RETURN_GENERATED_KEYS);
-            adicionarParametrosInsert(stm, cli);
+            adicionarParametros(stm, cli);
             stm.executeUpdate();
 
             try (ResultSet rs = stm.getGeneratedKeys()) {
@@ -39,13 +43,21 @@ public class ClienteDaoImpl implements ClienteDAO {
     }
 
     private String getSqlInsert() {
-        return "INSERT INTO cliente (codigo, nome, email) VALUES (?, ?, ?)";
+        return "INSERT INTO tb_cliente (nome, cpf, tel, endereco, numero, cidade, estado, email, qtd_compras) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
     }
 
-    private void adicionarParametrosInsert(PreparedStatement stm, Cliente cliente) throws Exception {
-        stm.setString(1, cliente.getCodigo());
-        stm.setString(2, cliente.getNome());
-        stm.setString(3, cliente.getEmail());
+    /** Parâmetros 1 a 9, comuns ao INSERT e ao UPDATE. */
+    private void adicionarParametros(PreparedStatement stm, Cliente cliente) throws Exception {
+        stm.setString(1, cliente.getNome());
+        stm.setLong(2, cliente.getCpf());
+        stm.setObject(3, cliente.getTel(), Types.BIGINT);
+        stm.setString(4, cliente.getEnd());
+        stm.setObject(5, cliente.getNumero(), Types.INTEGER);
+        stm.setString(6, cliente.getCidade());
+        stm.setString(7, cliente.getEstado());
+        stm.setString(8, cliente.getEmail());
+        stm.setInt(9, cliente.getQtdCompras());
     }
 
     @Override
@@ -56,7 +68,8 @@ public class ClienteDaoImpl implements ClienteDAO {
         try {
             conn = ConnectionFactory.getConnection();
             stm = conn.prepareStatement(getSqlUpdate());
-            adicionarParametrosUpdate(stm, cliente);
+            adicionarParametros(stm, cliente);
+            stm.setLong(10, cliente.getId());
             return stm.executeUpdate();
         } finally {
             if (stm != null) {
@@ -69,25 +82,19 @@ public class ClienteDaoImpl implements ClienteDAO {
     }
 
     private String getSqlUpdate() {
-        return "UPDATE cliente SET codigo = ?, nome = ?, email = ? WHERE id = ?";
-    }
-
-    private void adicionarParametrosUpdate(PreparedStatement stm, Cliente cliente) throws Exception {
-        stm.setString(1, cliente.getCodigo());
-        stm.setString(2, cliente.getNome());
-        stm.setString(3, cliente.getEmail());
-        stm.setLong(4, cliente.getId());
+        return "UPDATE tb_cliente SET nome = ?, cpf = ?, tel = ?, endereco = ?, numero = ?, "
+                + "cidade = ?, estado = ?, email = ?, qtd_compras = ? WHERE id = ?";
     }
 
     @Override
-    public Cliente buscaCliente(String codigo) throws Exception {
+    public Cliente buscaCliente(Long cpf) throws Exception {
         Connection conn = null;
         PreparedStatement stm = null;
 
         try {
             conn = ConnectionFactory.getConnection();
-            stm = conn.prepareStatement("SELECT id, codigo, nome, email FROM cliente WHERE codigo = ?");
-            stm.setString(1, codigo);
+            stm = conn.prepareStatement("SELECT " + COLUNAS + " FROM tb_cliente WHERE cpf = ?");
+            stm.setLong(1, cpf);
 
             try (ResultSet rs = stm.executeQuery()) {
                 if (rs.next()) {
@@ -113,7 +120,7 @@ public class ClienteDaoImpl implements ClienteDAO {
 
         try {
             conn = ConnectionFactory.getConnection();
-            stm = conn.prepareStatement("SELECT id, codigo, nome, email FROM cliente");
+            stm = conn.prepareStatement("SELECT " + COLUNAS + " FROM tb_cliente");
 
             try (ResultSet rs = stm.executeQuery()) {
                 while (rs.next()) {
@@ -138,7 +145,7 @@ public class ClienteDaoImpl implements ClienteDAO {
 
         try {
             conn = ConnectionFactory.getConnection();
-            stm = conn.prepareStatement("DELETE FROM cliente WHERE id = ?");
+            stm = conn.prepareStatement("DELETE FROM tb_cliente WHERE id = ?");
             stm.setLong(1, cli.getId());
             return stm.executeUpdate();
         } finally {
@@ -154,9 +161,15 @@ public class ClienteDaoImpl implements ClienteDAO {
     private Cliente montaCliente(ResultSet rs) throws Exception {
         Cliente cliente = new Cliente();
         cliente.setId(rs.getLong("id"));
-        cliente.setCodigo(rs.getString("codigo"));
         cliente.setNome(rs.getString("nome"));
+        cliente.setCpf(rs.getLong("cpf"));
+        cliente.setTel(rs.getObject("tel", Long.class));
+        cliente.setEnd(rs.getString("endereco"));
+        cliente.setNumero(rs.getObject("numero", Integer.class));
+        cliente.setCidade(rs.getString("cidade"));
+        cliente.setEstado(rs.getString("estado"));
         cliente.setEmail(rs.getString("email"));
+        cliente.setQtdCompras(rs.getInt("qtd_compras"));
         return cliente;
     }
 }

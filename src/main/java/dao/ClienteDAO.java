@@ -7,7 +7,7 @@ import model.Cliente;
 public interface ClienteDAO {
     Integer cadastrar(Cliente cliente) throws Exception;
     Integer atualizar(Cliente cliente) throws Exception;
-    Cliente buscaCliente(String codigo) throws Exception;
+    Cliente buscaCliente(Long cpf) throws Exception;
     List<Cliente> buscatodos() throws Exception;
     Integer excluir(Cliente cliente) throws Exception;
 }

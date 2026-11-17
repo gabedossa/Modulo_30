@@ -2,21 +2,34 @@ package model;
 
 import java.math.BigDecimal;
 
-public class Produto {
+import anotacao.ColunaTabela;
+import anotacao.Tabela;
+import anotacao.TipoChave;
+
+@Tabela("TB_PRODUTO")
+public class Produto implements Persistente {
+
+    @ColunaTabela(dbName = "id", setJavaName = "setId")
     private Long id;
+
+    @TipoChave("getCodigo")
+    @ColunaTabela(dbName = "codigo", setJavaName = "setCodigo")
     private String codigo;
+
+    @ColunaTabela(dbName = "nome", setJavaName = "setNome")
     private String nome;
-    private BigDecimal preco;
-    private Integer quantidade;
+
+    @ColunaTabela(dbName = "descricao", setJavaName = "setDescricao")
+    private String descricao;
+
+    @ColunaTabela(dbName = "valor", setJavaName = "setValor")
+    private BigDecimal valor;
+
+    @ColunaTabela(dbName = "valor_compra", setJavaName = "setValorCompra")
+    private BigDecimal valorCompra;
+
+    @ColunaTabela(dbName = "disponivel", setJavaName = "setDisponivel")
     private Boolean disponivel = Boolean.TRUE;
-
-    public Long getId(){
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getCodigo() {
         return codigo;
@@ -34,20 +47,28 @@ public class Produto {
         this.nome = nome;
     }
 
-    public BigDecimal getPreco() {
-        return preco;
+    public String getDescricao() {
+        return descricao;
     }
 
-    public void setPreco(BigDecimal preco) {
-        this.preco = preco;
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
     }
 
-    public Integer getQuantidade() {
-        return quantidade;
+    public BigDecimal getValor() {
+        return valor;
     }
 
-    public void setQuantidade(Integer quantidade) {
-        this.quantidade = quantidade;
+    public void setValor(BigDecimal valor) {
+        this.valor = valor;
+    }
+
+    public BigDecimal getValorCompra() {
+        return valorCompra;
+    }
+
+    public void setValorCompra(BigDecimal valorCompra) {
+        this.valorCompra = valorCompra;
     }
 
     public Boolean getDisponivel() {
@@ -58,4 +79,13 @@ public class Produto {
         this.disponivel = disponivel;
     }
 
+    @Override
+    public Long getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(Long id) {
+        this.id = id;
+    }
 }

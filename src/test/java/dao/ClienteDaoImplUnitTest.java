@@ -16,6 +16,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,35 @@ import model.Cliente;
 
 class ClienteDaoImplUnitTest {
 
+    private static final String COLUNAS = "id, nome, cpf, tel, endereco, numero, cidade, estado, email, qtd_compras";
+
     private final ClienteDaoImpl dao = new ClienteDaoImpl();
+
+    private Cliente clienteCompleto() {
+        Cliente cliente = new Cliente();
+        cliente.setNome("Joao da Silva");
+        cliente.setCpf(12345678901L);
+        cliente.setTel(11999998888L);
+        cliente.setEnd("Rua das Flores");
+        cliente.setNumero(100);
+        cliente.setCidade("Sao Paulo");
+        cliente.setEstado("SP");
+        cliente.setEmail("joao@email.com");
+        cliente.setQtdCompras(4);
+        return cliente;
+    }
+
+    private void verificaParametrosDoCliente(PreparedStatement stm) throws Exception {
+        verify(stm).setString(1, "Joao da Silva");
+        verify(stm).setLong(2, 12345678901L);
+        verify(stm).setObject(3, 11999998888L, Types.BIGINT);
+        verify(stm).setString(4, "Rua das Flores");
+        verify(stm).setObject(5, 100, Types.INTEGER);
+        verify(stm).setString(6, "Sao Paulo");
+        verify(stm).setString(7, "SP");
+        verify(stm).setString(8, "joao@email.com");
+        verify(stm).setInt(9, 4);
+    }
 
     @Test
     void cadastrarDeveInserirClienteEFecharConexao() throws Exception {
@@ -39,39 +68,54 @@ class ClienteDaoImplUnitTest {
         when(generatedKeys.next()).thenReturn(true);
         when(generatedKeys.getInt(1)).thenReturn(7);
 
-        Cliente cliente = new Cliente();
-        cliente.setCodigo("CLI-001");
-        cliente.setNome("Joao da Silva");
-        cliente.setEmail("joao@email.com");
-
         Integer id;
         try (MockedStatic<ConnectionFactory> factory = mockStatic(ConnectionFactory.class)) {
             factory.when(ConnectionFactory::getConnection).thenReturn(conn);
-            id = dao.cadastrar(cliente);
+            id = dao.cadastrar(clienteCompleto());
         }
 
         assertEquals(7, id);
-        verify(conn).prepareStatement("INSERT INTO cliente (codigo, nome, email) VALUES (?, ?, ?)",
+        verify(conn).prepareStatement(
+                "INSERT INTO tb_cliente (nome, cpf, tel, endereco, numero, cidade, estado, email, qtd_compras) "
+                        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS);
-        verify(stm).setString(1, "CLI-001");
-        verify(stm).setString(2, "Joao da Silva");
-        verify(stm).setString(3, "joao@email.com");
+        verificaParametrosDoCliente(stm);
         verify(stm).close();
         verify(conn).close();
     }
 
     @Test
-    void atualizarDeveAtualizarCodigoNomeEmailEId() throws Exception {
+    void cadastrarDeveAceitarTelefoneENumeroNulos() throws Exception {
+        Connection conn = mock(Connection.class);
+        PreparedStatement stm = mock(PreparedStatement.class);
+        ResultSet generatedKeys = mock(ResultSet.class);
+
+        when(conn.prepareStatement(anyString(), eq(Statement.RETURN_GENERATED_KEYS))).thenReturn(stm);
+        when(stm.getGeneratedKeys()).thenReturn(generatedKeys);
+
+        Cliente cliente = new Cliente();
+        cliente.setNome("Sem Telefone");
+        cliente.setCpf(1L);
+
+        try (MockedStatic<ConnectionFactory> factory = mockStatic(ConnectionFactory.class)) {
+            factory.when(ConnectionFactory::getConnection).thenReturn(conn);
+            dao.cadastrar(cliente);
+        }
+
+        verify(stm).setObject(3, null, Types.BIGINT);
+        verify(stm).setObject(5, null, Types.INTEGER);
+        verify(stm).setInt(9, 0);
+    }
+
+    @Test
+    void atualizarDeveAtualizarTodosOsCamposPeloId() throws Exception {
         Connection conn = mock(Connection.class);
         PreparedStatement stm = mock(PreparedStatement.class);
         when(conn.prepareStatement(anyString())).thenReturn(stm);
         when(stm.executeUpdate()).thenReturn(1);
 
-        Cliente cliente = new Cliente();
+        Cliente cliente = clienteCompleto();
         cliente.setId(3L);
-        cliente.setCodigo("CLI-002");
-        cliente.setNome("Maria Souza");
-        cliente.setEmail("maria@email.com");
 
         Integer linhas;
         try (MockedStatic<ConnectionFactory> factory = mockStatic(ConnectionFactory.class)) {
@@ -80,11 +124,10 @@ class ClienteDaoImplUnitTest {
         }
 
         assertEquals(1, linhas);
-        verify(conn).prepareStatement("UPDATE cliente SET codigo = ?, nome = ?, email = ? WHERE id = ?");
-        verify(stm).setString(1, "CLI-002");
-        verify(stm).setString(2, "Maria Souza");
-        verify(stm).setString(3, "maria@email.com");
-        verify(stm).setLong(4, 3L);
+        verify(conn).prepareStatement("UPDATE tb_cliente SET nome = ?, cpf = ?, tel = ?, endereco = ?, numero = ?, "
+                + "cidade = ?, estado = ?, email = ?, qtd_compras = ? WHERE id = ?");
+        verificaParametrosDoCliente(stm);
+        verify(stm).setLong(10, 3L);
         verify(stm).close();
         verify(conn).close();
     }
@@ -99,22 +142,35 @@ class ClienteDaoImplUnitTest {
         when(stm.executeQuery()).thenReturn(rs);
         when(rs.next()).thenReturn(true);
         when(rs.getLong("id")).thenReturn(5L);
-        when(rs.getString("codigo")).thenReturn("CLI-005");
         when(rs.getString("nome")).thenReturn("Cliente Cinco");
+        when(rs.getLong("cpf")).thenReturn(55555555555L);
+        when(rs.getObject("tel", Long.class)).thenReturn(1133334444L);
+        when(rs.getString("endereco")).thenReturn("Av. Brasil");
+        when(rs.getObject("numero", Integer.class)).thenReturn(50);
+        when(rs.getString("cidade")).thenReturn("Curitiba");
+        when(rs.getString("estado")).thenReturn("PR");
         when(rs.getString("email")).thenReturn("cinco@email.com");
+        when(rs.getInt("qtd_compras")).thenReturn(7);
 
         Cliente encontrado;
         try (MockedStatic<ConnectionFactory> factory = mockStatic(ConnectionFactory.class)) {
             factory.when(ConnectionFactory::getConnection).thenReturn(conn);
-            encontrado = dao.buscaCliente("CLI-005");
+            encontrado = dao.buscaCliente(55555555555L);
         }
 
         assertNotNull(encontrado);
         assertEquals(5L, encontrado.getId());
-        assertEquals("CLI-005", encontrado.getCodigo());
         assertEquals("Cliente Cinco", encontrado.getNome());
+        assertEquals(55555555555L, encontrado.getCpf());
+        assertEquals(1133334444L, encontrado.getTel());
+        assertEquals("Av. Brasil", encontrado.getEnd());
+        assertEquals(50, encontrado.getNumero());
+        assertEquals("Curitiba", encontrado.getCidade());
+        assertEquals("PR", encontrado.getEstado());
         assertEquals("cinco@email.com", encontrado.getEmail());
-        verify(stm).setString(1, "CLI-005");
+        assertEquals(7, encontrado.getQtdCompras());
+        verify(conn).prepareStatement("SELECT " + COLUNAS + " FROM tb_cliente WHERE cpf = ?");
+        verify(stm).setLong(1, 55555555555L);
     }
 
     @Test
@@ -129,7 +185,7 @@ class ClienteDaoImplUnitTest {
         Cliente encontrado;
         try (MockedStatic<ConnectionFactory> factory = mockStatic(ConnectionFactory.class)) {
             factory.when(ConnectionFactory::getConnection).thenReturn(conn);
-            encontrado = dao.buscaCliente("INEXISTENTE");
+            encontrado = dao.buscaCliente(0L);
         }
 
         assertNull(encontrado);
@@ -145,7 +201,7 @@ class ClienteDaoImplUnitTest {
         when(stm.executeQuery()).thenReturn(rs);
         when(rs.next()).thenReturn(true, true, false);
         when(rs.getLong("id")).thenReturn(1L, 2L);
-        when(rs.getString("codigo")).thenReturn("CLI-001", "CLI-002");
+        when(rs.getLong("cpf")).thenReturn(11111111111L, 22222222222L);
         when(rs.getString("nome")).thenReturn("Cliente Um", "Cliente Dois");
 
         List<Cliente> todos;
@@ -155,8 +211,50 @@ class ClienteDaoImplUnitTest {
         }
 
         assertEquals(2, todos.size());
-        assertEquals("CLI-001", todos.get(0).getCodigo());
-        assertEquals("CLI-002", todos.get(1).getCodigo());
+        assertEquals(11111111111L, todos.get(0).getCpf());
+        assertEquals(22222222222L, todos.get(1).getCpf());
+        verify(conn).prepareStatement("SELECT " + COLUNAS + " FROM tb_cliente");
+    }
+
+    @Test
+    void cadastrarDeveRetornarNuloQuandoBancoNaoDevolveId() throws Exception {
+        Connection conn = mock(Connection.class);
+        PreparedStatement stm = mock(PreparedStatement.class);
+        ResultSet generatedKeys = mock(ResultSet.class);
+        when(conn.prepareStatement(anyString(), eq(Statement.RETURN_GENERATED_KEYS))).thenReturn(stm);
+        when(stm.getGeneratedKeys()).thenReturn(generatedKeys);
+        when(generatedKeys.next()).thenReturn(false);
+
+        Integer id;
+        try (MockedStatic<ConnectionFactory> factory = mockStatic(ConnectionFactory.class)) {
+            factory.when(ConnectionFactory::getConnection).thenReturn(conn);
+            id = dao.cadastrar(clienteCompleto());
+        }
+
+        assertNull(id);
+        verify(conn).close();
+    }
+
+    @Test
+    void excluirDeveRemoverPeloIdEDevolverLinhasAfetadas() throws Exception {
+        Connection conn = mock(Connection.class);
+        PreparedStatement stm = mock(PreparedStatement.class);
+        when(conn.prepareStatement(anyString())).thenReturn(stm);
+        when(stm.executeUpdate()).thenReturn(1);
+
+        Cliente cliente = new Cliente();
+        cliente.setId(8L);
+
+        Integer linhas;
+        try (MockedStatic<ConnectionFactory> factory = mockStatic(ConnectionFactory.class)) {
+            factory.when(ConnectionFactory::getConnection).thenReturn(conn);
+            linhas = dao.excluir(cliente);
+        }
+
+        assertEquals(1, linhas);
+        verify(stm).setLong(1, 8L);
+        verify(stm).close();
+        verify(conn).close();
     }
 
     @Test
@@ -174,6 +272,7 @@ class ClienteDaoImplUnitTest {
             assertThrows(SQLException.class, () -> dao.excluir(cliente));
         }
 
+        verify(conn).prepareStatement("DELETE FROM tb_cliente WHERE id = ?");
         verify(stm).close();
         verify(conn).close();
     }

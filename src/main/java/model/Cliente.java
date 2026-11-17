@@ -1,26 +1,42 @@
 package model;
 
-public class Cliente {
+import anotacao.ColunaTabela;
+import anotacao.Tabela;
+import anotacao.TipoChave;
+
+@Tabela("TB_CLIENTE")
+public class Cliente implements Persistente {
+
+    @ColunaTabela(dbName = "id", setJavaName = "setId")
     private Long id;
-    private String codigo;
+
+    @ColunaTabela(dbName = "nome", setJavaName = "setNome")
     private String nome;
+
+    @TipoChave("getCpf")
+    @ColunaTabela(dbName = "cpf", setJavaName = "setCpf")
+    private Long cpf;
+
+    @ColunaTabela(dbName = "tel", setJavaName = "setTel")
+    private Long tel;
+
+    @ColunaTabela(dbName = "endereco", setJavaName = "setEnd")
+    private String end;
+
+    @ColunaTabela(dbName = "numero", setJavaName = "setNumero")
+    private Integer numero;
+
+    @ColunaTabela(dbName = "cidade", setJavaName = "setCidade")
+    private String cidade;
+
+    @ColunaTabela(dbName = "estado", setJavaName = "setEstado")
+    private String estado;
+
+    @ColunaTabela(dbName = "email", setJavaName = "setEmail")
     private String email;
 
-    public Long getId(){
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getCodigo() {
-        return codigo;
-    }
-
-    public void setCodigo(String codigo) {
-        this.codigo = codigo;
-    }
+    @ColunaTabela(dbName = "qtd_compras", setJavaName = "setQtdCompras")
+    private Integer qtdCompras = 0;
 
     public String getNome() {
         return nome;
@@ -28,6 +44,54 @@ public class Cliente {
 
     public void setNome(String nome) {
         this.nome = nome;
+    }
+
+    public Long getCpf() {
+        return cpf;
+    }
+
+    public void setCpf(Long cpf) {
+        this.cpf = cpf;
+    }
+
+    public Long getTel() {
+        return tel;
+    }
+
+    public void setTel(Long tel) {
+        this.tel = tel;
+    }
+
+    public String getEnd() {
+        return end;
+    }
+
+    public void setEnd(String end) {
+        this.end = end;
+    }
+
+    public Integer getNumero() {
+        return numero;
+    }
+
+    public void setNumero(Integer numero) {
+        this.numero = numero;
+    }
+
+    public String getCidade() {
+        return cidade;
+    }
+
+    public void setCidade(String cidade) {
+        this.cidade = cidade;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
     }
 
     public String getEmail() {
@@ -38,4 +102,21 @@ public class Cliente {
         this.email = email;
     }
 
+    public Integer getQtdCompras() {
+        return qtdCompras;
+    }
+
+    public void setQtdCompras(Integer qtdCompras) {
+        this.qtdCompras = qtdCompras;
+    }
+
+    @Override
+    public Long getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(Long id) {
+        this.id = id;
+    }
 }
