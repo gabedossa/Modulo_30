@@ -54,8 +54,8 @@ class AnotacaoTest {
     @Test
     void deveMapearTodasAsColunasDasTabelas() {
         assertEquals(List.of("id", "nome", "cpf", "tel", "endereco", "numero", "cidade", "estado", "email",
-                "qtd_compras"), colunas(Cliente.class));
-        assertEquals(List.of("id", "codigo", "nome", "descricao", "valor", "valor_compra", "disponivel"),
+                "qtd_compras", "data_nascimento"), colunas(Cliente.class));
+        assertEquals(List.of("id", "codigo", "nome", "descricao", "valor", "valor_compra", "disponivel", "marca"),
                 colunas(Produto.class));
         assertEquals(List.of("id", "codigo", "id_cliente_fk", "valor_total", "data_venda", "status_venda"),
                 colunas(Venda.class));

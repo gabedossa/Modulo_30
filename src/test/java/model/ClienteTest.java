@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.time.LocalDate;
+
 import org.junit.jupiter.api.Test;
 
 class ClienteTest {
@@ -23,6 +25,7 @@ class ClienteTest {
         assertNull(cliente.getTel());
         assertNull(cliente.getNumero());
         assertNull(cliente.getEmail());
+        assertNull(cliente.getDataNascimento());
     }
 
     @Test
@@ -38,6 +41,7 @@ class ClienteTest {
         cliente.setEstado("SP");
         cliente.setEmail("joao@email.com");
         cliente.setQtdCompras(5);
+        cliente.setDataNascimento(LocalDate.of(1990, 5, 20));
 
         assertEquals(1L, cliente.getId());
         assertEquals("Joao da Silva", cliente.getNome());
@@ -49,6 +53,7 @@ class ClienteTest {
         assertEquals("SP", cliente.getEstado());
         assertEquals("joao@email.com", cliente.getEmail());
         assertEquals(5, cliente.getQtdCompras());
+        assertEquals(LocalDate.of(1990, 5, 20), cliente.getDataNascimento());
     }
 
     @Test

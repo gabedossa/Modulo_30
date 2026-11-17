@@ -18,8 +18,8 @@ Projeto de estudo (curso EBAC, módulo 30) para praticar acesso a banco de dados
 
 O projeto trabalha com quatro entidades:
 
-- **Cliente** — cadastro de clientes (nome, CPF, telefone, endereço, e-mail e quantidade de compras).
-- **Produto** — cadastro de produtos (código, nome, descrição, valor de venda, valor de compra e se está disponível).
+- **Cliente** — cadastro de clientes (nome, CPF, telefone, endereço, e-mail, data de nascimento e quantidade de compras).
+- **Produto** — cadastro de produtos (código, nome, descrição, marca, valor de venda, valor de compra e se está disponível).
 - **Venda** — uma venda para um cliente, com código, data, status (`INICIADA`, `CONCLUIDA`, `CANCELADA`) e valor total.
 - **ProdutoQuantidade** — cada item da venda: o produto, a quantidade e o valor total do item. Resolve o relacionamento N:N entre `Venda` e `Produto`.
 
@@ -50,7 +50,8 @@ CREATE TABLE tb_cliente (
     cidade VARCHAR(50),
     estado VARCHAR(50),
     email VARCHAR(150),
-    qtd_compras INT NOT NULL DEFAULT 0
+    qtd_compras INT NOT NULL DEFAULT 0,
+    data_nascimento DATE
 );
 
 -- Produto
@@ -61,7 +62,8 @@ CREATE TABLE tb_produto (
     descricao VARCHAR(255),
     valor NUMERIC(10,2) NOT NULL,
     valor_compra NUMERIC(10,2),
-    disponivel BOOLEAN NOT NULL DEFAULT TRUE
+    disponivel BOOLEAN NOT NULL DEFAULT TRUE,
+    marca VARCHAR(50)
 );
 
 -- Venda
@@ -90,11 +92,13 @@ Se o banco ainda tem as tabelas da versão anterior (módulo 29), apague-as ante
 DROP TABLE IF EXISTS item_pedido, pedido, cliente, produto;
 ```
 
-Se as tabelas `tb_cliente`/`tb_produto` já existiam antes das colunas `qtd_compras` e `valor_compra`, basta adicioná-las:
+Se as tabelas `tb_cliente`/`tb_produto` já existiam antes das colunas mais novas, basta adicioná-las (o `IF NOT EXISTS` pula as que já estiverem lá):
 
 ```sql
-ALTER TABLE tb_cliente ADD COLUMN qtd_compras INT NOT NULL DEFAULT 0;
-ALTER TABLE tb_produto ADD COLUMN valor_compra NUMERIC(10,2);
+ALTER TABLE tb_cliente ADD COLUMN IF NOT EXISTS qtd_compras INT NOT NULL DEFAULT 0;
+ALTER TABLE tb_cliente ADD COLUMN IF NOT EXISTS data_nascimento DATE;
+ALTER TABLE tb_produto ADD COLUMN IF NOT EXISTS valor_compra NUMERIC(10,2);
+ALTER TABLE tb_produto ADD COLUMN IF NOT EXISTS marca VARCHAR(50);
 ```
 
 Pontos importantes do schema:
@@ -102,6 +106,7 @@ Pontos importantes do schema:
 - `tb_cliente.cpf` é a chave de negócio do cliente (`@TipoChave("getCpf")`) e é usada na busca; `tel`, endereço, `numero`, `cidade`, `estado` e `email` são opcionais.
 - `tb_produto.codigo` e `tb_venda.codigo` são as chaves de negócio de produto e venda (`@TipoChave("getCodigo")`).
 - `tb_cliente.qtd_compras` guarda quantas compras o cliente já fez; começa em `0`, tanto no banco quanto no model `Cliente`.
+- `tb_cliente.data_nascimento` e `tb_produto.marca` são opcionais.
 - `tb_produto.valor_compra` é quanto a loja pagou pelo produto (o custo); `valor` é o preço de venda. É opcional.
 - `tb_produto.disponivel` indica se o produto está ativo para venda; o padrão é `TRUE`, tanto no banco quanto no model `Produto`.
 - `tb_venda.status_venda` guarda o nome do enum `Venda.Status`. Se a venda for cadastrada sem data ou sem status, o DAO usa a data atual e `INICIADA`.

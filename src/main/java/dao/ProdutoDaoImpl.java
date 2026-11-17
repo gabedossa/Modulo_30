@@ -12,7 +12,7 @@ import model.Produto;
 
 public class ProdutoDaoImpl implements ProdutoDAO {
 
-    private static final String COLUNAS = "id, codigo, nome, descricao, valor, valor_compra, disponivel";
+    private static final String COLUNAS = "id, codigo, nome, descricao, valor, valor_compra, disponivel, marca";
 
     @Override
     public Integer cadastrar(Produto produto) throws Exception {
@@ -42,11 +42,11 @@ public class ProdutoDaoImpl implements ProdutoDAO {
     }
 
     private String getSqlInsert() {
-        return "INSERT INTO tb_produto (codigo, nome, descricao, valor, valor_compra, disponivel) "
-                + "VALUES (?, ?, ?, ?, ?, ?)";
+        return "INSERT INTO tb_produto (codigo, nome, descricao, valor, valor_compra, disponivel, marca) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?)";
     }
 
-    /** Parâmetros 1 a 6, comuns ao INSERT e ao UPDATE. */
+    /** Parâmetros 1 a 7, comuns ao INSERT e ao UPDATE. */
     private void adicionarParametros(PreparedStatement stm, Produto produto) throws Exception {
         stm.setString(1, produto.getCodigo());
         stm.setString(2, produto.getNome());
@@ -54,6 +54,7 @@ public class ProdutoDaoImpl implements ProdutoDAO {
         stm.setBigDecimal(4, produto.getValor());
         stm.setBigDecimal(5, produto.getValorCompra());
         stm.setBoolean(6, produto.getDisponivel());
+        stm.setString(7, produto.getMarca());
     }
 
     @Override
@@ -65,7 +66,7 @@ public class ProdutoDaoImpl implements ProdutoDAO {
             conn = ConnectionFactory.getConnection();
             stm = conn.prepareStatement(getSqlUpdate());
             adicionarParametros(stm, produto);
-            stm.setLong(7, produto.getId());
+            stm.setLong(8, produto.getId());
             return stm.executeUpdate();
         } finally {
             if (stm != null) {
@@ -79,7 +80,7 @@ public class ProdutoDaoImpl implements ProdutoDAO {
 
     private String getSqlUpdate() {
         return "UPDATE tb_produto SET codigo = ?, nome = ?, descricao = ?, valor = ?, valor_compra = ?, "
-                + "disponivel = ? WHERE id = ?";
+                + "disponivel = ?, marca = ? WHERE id = ?";
     }
 
     @Override
@@ -163,6 +164,7 @@ public class ProdutoDaoImpl implements ProdutoDAO {
         produto.setValor(rs.getBigDecimal("valor"));
         produto.setValorCompra(rs.getBigDecimal("valor_compra"));
         produto.setDisponivel(rs.getBoolean("disponivel"));
+        produto.setMarca(rs.getString("marca"));
         return produto;
     }
 }

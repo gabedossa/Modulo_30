@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -35,6 +36,7 @@ class ClienteDaoImplTest {
         cliente.setEstado("SP");
         cliente.setEmail("teste@email.com");
         cliente.setQtdCompras(2);
+        cliente.setDataNascimento(LocalDate.of(1990, 5, 20));
         Integer id = dao.cadastrar(cliente);
         cliente.setId(id.longValue());
         criados.add(cliente);
@@ -70,6 +72,7 @@ class ClienteDaoImplTest {
         assertEquals("SP", encontrado.getEstado());
         assertEquals("teste@email.com", encontrado.getEmail());
         assertEquals(2, encontrado.getQtdCompras());
+        assertEquals(LocalDate.of(1990, 5, 20), encontrado.getDataNascimento());
     }
 
     @Test
@@ -82,6 +85,7 @@ class ClienteDaoImplTest {
         cliente.setEstado("RJ");
         cliente.setEmail("maria.atualizada@email.com");
         cliente.setQtdCompras(3);
+        cliente.setDataNascimento(LocalDate.of(1985, 12, 1));
         Integer linhasAfetadas = dao.atualizar(cliente);
 
         assertEquals(1, linhasAfetadas);
@@ -93,6 +97,7 @@ class ClienteDaoImplTest {
         assertEquals("RJ", encontrado.getEstado());
         assertEquals("maria.atualizada@email.com", encontrado.getEmail());
         assertEquals(3, encontrado.getQtdCompras());
+        assertEquals(LocalDate.of(1985, 12, 1), encontrado.getDataNascimento());
     }
 
     @Test

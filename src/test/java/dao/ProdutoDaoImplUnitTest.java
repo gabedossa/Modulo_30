@@ -27,7 +27,7 @@ import model.Produto;
 
 class ProdutoDaoImplUnitTest {
 
-    private static final String COLUNAS = "id, codigo, nome, descricao, valor, valor_compra, disponivel";
+    private static final String COLUNAS = "id, codigo, nome, descricao, valor, valor_compra, disponivel, marca";
 
     private final ProdutoDaoImpl dao = new ProdutoDaoImpl();
 
@@ -49,6 +49,7 @@ class ProdutoDaoImplUnitTest {
         produto.setValor(new BigDecimal("199.90"));
         produto.setValorCompra(new BigDecimal("120.00"));
         produto.setDisponivel(false);
+        produto.setMarca("Logitech");
 
         Integer id;
         try (MockedStatic<ConnectionFactory> factory = mockStatic(ConnectionFactory.class)) {
@@ -58,8 +59,8 @@ class ProdutoDaoImplUnitTest {
 
         assertEquals(11, id);
         verify(conn).prepareStatement(
-                "INSERT INTO tb_produto (codigo, nome, descricao, valor, valor_compra, disponivel) "
-                        + "VALUES (?, ?, ?, ?, ?, ?)",
+                "INSERT INTO tb_produto (codigo, nome, descricao, valor, valor_compra, disponivel, marca) "
+                        + "VALUES (?, ?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS);
         verify(stm).setString(1, "PRD-001");
         verify(stm).setString(2, "Teclado");
@@ -67,6 +68,7 @@ class ProdutoDaoImplUnitTest {
         verify(stm).setBigDecimal(4, new BigDecimal("199.90"));
         verify(stm).setBigDecimal(5, new BigDecimal("120.00"));
         verify(stm).setBoolean(6, false);
+        verify(stm).setString(7, "Logitech");
         verify(stm).close();
         verify(conn).close();
     }
@@ -86,6 +88,7 @@ class ProdutoDaoImplUnitTest {
         produto.setValor(new BigDecimal("69.90"));
         produto.setValorCompra(new BigDecimal("40.00"));
         produto.setDisponivel(true);
+        produto.setMarca("Microsoft");
 
         Integer linhas;
         try (MockedStatic<ConnectionFactory> factory = mockStatic(ConnectionFactory.class)) {
@@ -96,14 +99,15 @@ class ProdutoDaoImplUnitTest {
         assertEquals(1, linhas);
         verify(conn).prepareStatement(
                 "UPDATE tb_produto SET codigo = ?, nome = ?, descricao = ?, valor = ?, valor_compra = ?, "
-                        + "disponivel = ? WHERE id = ?");
+                        + "disponivel = ?, marca = ? WHERE id = ?");
         verify(stm).setString(1, "PRD-002");
         verify(stm).setString(2, "Mouse");
         verify(stm).setString(3, "Mouse sem fio");
         verify(stm).setBigDecimal(4, new BigDecimal("69.90"));
         verify(stm).setBigDecimal(5, new BigDecimal("40.00"));
         verify(stm).setBoolean(6, true);
-        verify(stm).setLong(7, 4L);
+        verify(stm).setString(7, "Microsoft");
+        verify(stm).setLong(8, 4L);
         verify(stm).close();
         verify(conn).close();
     }
@@ -124,6 +128,7 @@ class ProdutoDaoImplUnitTest {
         when(rs.getBigDecimal("valor")).thenReturn(new BigDecimal("899.00"));
         when(rs.getBigDecimal("valor_compra")).thenReturn(new BigDecimal("650.00"));
         when(rs.getBoolean("disponivel")).thenReturn(false);
+        when(rs.getString("marca")).thenReturn("Dell");
 
         Produto encontrado;
         try (MockedStatic<ConnectionFactory> factory = mockStatic(ConnectionFactory.class)) {
@@ -138,6 +143,7 @@ class ProdutoDaoImplUnitTest {
         assertEquals("Monitor 24 polegadas", encontrado.getDescricao());
         assertEquals(0, new BigDecimal("899.00").compareTo(encontrado.getValor()));
         assertEquals(0, new BigDecimal("650.00").compareTo(encontrado.getValorCompra()));
+        assertEquals("Dell", encontrado.getMarca());
         assertEquals(false, encontrado.getDisponivel());
         verify(conn).prepareStatement("SELECT " + COLUNAS + " FROM tb_produto WHERE codigo = ?");
         verify(stm).setString(1, "PRD-008");

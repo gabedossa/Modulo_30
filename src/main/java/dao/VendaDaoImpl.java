@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -41,13 +42,14 @@ public class VendaDaoImpl implements VendaDAO {
             "SELECT v.id, v.codigo, v.valor_total, v.data_venda, v.status_venda, "
                     + "c.id AS c_id, c.nome AS c_nome, c.cpf AS c_cpf, c.tel AS c_tel, c.endereco AS c_endereco, "
                     + "c.numero AS c_numero, c.cidade AS c_cidade, c.estado AS c_estado, c.email AS c_email, "
-                    + "c.qtd_compras AS c_qtd_compras "
+                    + "c.qtd_compras AS c_qtd_compras, c.data_nascimento AS c_data_nascimento "
                     + "FROM tb_venda v JOIN tb_cliente c ON c.id = v.id_cliente_fk";
 
     static final String SQL_SELECT_ITENS =
             "SELECT pq.id, pq.quantidade, pq.valor_total, "
                     + "p.id AS p_id, p.codigo AS p_codigo, p.nome AS p_nome, p.descricao AS p_descricao, "
-                    + "p.valor AS p_valor, p.valor_compra AS p_valor_compra, p.disponivel AS p_disponivel "
+                    + "p.valor AS p_valor, p.valor_compra AS p_valor_compra, p.disponivel AS p_disponivel, "
+                    + "p.marca AS p_marca "
                     + "FROM tb_produto_quantidade pq JOIN tb_produto p ON p.id = pq.id_produto_fk "
                     + "WHERE pq.id_venda_fk = ?";
 
@@ -281,6 +283,7 @@ public class VendaDaoImpl implements VendaDAO {
         cliente.setEstado(rs.getString("c_estado"));
         cliente.setEmail(rs.getString("c_email"));
         cliente.setQtdCompras(rs.getInt("c_qtd_compras"));
+        cliente.setDataNascimento(rs.getObject("c_data_nascimento", LocalDate.class));
         return cliente;
     }
 
@@ -293,6 +296,7 @@ public class VendaDaoImpl implements VendaDAO {
         produto.setValor(rs.getBigDecimal("p_valor"));
         produto.setValorCompra(rs.getBigDecimal("p_valor_compra"));
         produto.setDisponivel(rs.getBoolean("p_disponivel"));
+        produto.setMarca(rs.getString("p_marca"));
 
         ProdutoQuantidade item = new ProdutoQuantidade();
         item.setId(rs.getLong("id"));

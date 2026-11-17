@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -211,6 +212,7 @@ class VendaDaoImplUnitTest {
         when(rsVenda.getString("c_nome")).thenReturn("Joao");
         when(rsVenda.getLong("c_cpf")).thenReturn(12345678901L);
         when(rsVenda.getInt("c_qtd_compras")).thenReturn(6);
+        when(rsVenda.getObject("c_data_nascimento", LocalDate.class)).thenReturn(LocalDate.of(1990, 5, 20));
 
         when(rsItens.next()).thenReturn(true, false);
         when(rsItens.getLong("id")).thenReturn(70L);
@@ -220,6 +222,7 @@ class VendaDaoImplUnitTest {
         when(rsItens.getString("p_codigo")).thenReturn("PRD-009");
         when(rsItens.getBigDecimal("p_valor")).thenReturn(new BigDecimal("10.00"));
         when(rsItens.getBigDecimal("p_valor_compra")).thenReturn(new BigDecimal("6.00"));
+        when(rsItens.getString("p_marca")).thenReturn("Dell");
 
         Venda venda;
         try (MockedStatic<ConnectionFactory> factory = mockStatic(ConnectionFactory.class)) {
@@ -235,6 +238,7 @@ class VendaDaoImplUnitTest {
         assertEquals(3L, venda.getCliente().getId());
         assertEquals(12345678901L, venda.getCliente().getCpf());
         assertEquals(6, venda.getCliente().getQtdCompras());
+        assertEquals(LocalDate.of(1990, 5, 20), venda.getCliente().getDataNascimento());
 
         assertEquals(1, venda.getProdutos().size());
         ProdutoQuantidade item = venda.getProdutos().iterator().next();
@@ -242,6 +246,7 @@ class VendaDaoImplUnitTest {
         assertEquals(2, item.getQuantidade());
         assertEquals("PRD-009", item.getProduto().getCodigo());
         assertEquals(0, new BigDecimal("6.00").compareTo(item.getProduto().getValorCompra()));
+        assertEquals("Dell", item.getProduto().getMarca());
         verify(stmVenda).setString(1, "V-001");
         verify(stmItens).setLong(1, 50L);
         verify(conn).close();

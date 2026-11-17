@@ -24,6 +24,7 @@ class ProdutoTest {
         assertNull(produto.getValor());
         assertNull(produto.getValorCompra());
         assertNull(produto.getDescricao());
+        assertNull(produto.getMarca());
     }
 
     @Test
@@ -36,6 +37,7 @@ class ProdutoTest {
         produto.setValor(new BigDecimal("199.90"));
         produto.setValorCompra(new BigDecimal("120.00"));
         produto.setDisponivel(false);
+        produto.setMarca("Logitech");
 
         assertEquals(2L, produto.getId());
         assertEquals("PRD-001", produto.getCodigo());
@@ -44,6 +46,7 @@ class ProdutoTest {
         assertEquals(new BigDecimal("199.90"), produto.getValor());
         assertEquals(new BigDecimal("120.00"), produto.getValorCompra());
         assertEquals(false, produto.getDisponivel());
+        assertEquals("Logitech", produto.getMarca());
     }
 
     @Test

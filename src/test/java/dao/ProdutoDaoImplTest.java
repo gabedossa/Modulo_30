@@ -27,6 +27,7 @@ class ProdutoDaoImplTest {
         produto.setDescricao(descricao);
         produto.setValor(valor);
         produto.setValorCompra(new BigDecimal("1.00"));
+        produto.setMarca("Marca Teste");
         Integer id = dao.cadastrar(produto);
         produto.setId(id.longValue());
         criados.add(produto);
@@ -58,6 +59,7 @@ class ProdutoDaoImplTest {
         assertEquals("Teclado mecanico", encontrado.getDescricao());
         assertEquals(0, new BigDecimal("199.90").compareTo(encontrado.getValor()));
         assertEquals(0, new BigDecimal("1.00").compareTo(encontrado.getValorCompra()));
+        assertEquals("Marca Teste", encontrado.getMarca());
         assertEquals(true, encontrado.getDisponivel());
     }
 
@@ -71,6 +73,7 @@ class ProdutoDaoImplTest {
         produto.setValor(new BigDecimal("69.90"));
         produto.setValorCompra(new BigDecimal("35.00"));
         produto.setDisponivel(false);
+        produto.setMarca("Outra Marca");
         Integer linhasAfetadas = dao.atualizar(produto);
 
         assertEquals(1, linhasAfetadas);
@@ -81,6 +84,7 @@ class ProdutoDaoImplTest {
         assertEquals("Mouse sem fio", encontrado.getDescricao());
         assertEquals(0, new BigDecimal("69.90").compareTo(encontrado.getValor()));
         assertEquals(0, new BigDecimal("35.00").compareTo(encontrado.getValorCompra()));
+        assertEquals("Outra Marca", encontrado.getMarca());
         assertEquals(false, encontrado.getDisponivel());
     }
 

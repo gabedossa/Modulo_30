@@ -17,6 +17,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -27,7 +28,10 @@ import model.Cliente;
 
 class ClienteDaoImplUnitTest {
 
-    private static final String COLUNAS = "id, nome, cpf, tel, endereco, numero, cidade, estado, email, qtd_compras";
+    private static final String COLUNAS =
+            "id, nome, cpf, tel, endereco, numero, cidade, estado, email, qtd_compras, data_nascimento";
+
+    private static final LocalDate NASCIMENTO = LocalDate.of(1990, 5, 20);
 
     private final ClienteDaoImpl dao = new ClienteDaoImpl();
 
@@ -42,6 +46,7 @@ class ClienteDaoImplUnitTest {
         cliente.setEstado("SP");
         cliente.setEmail("joao@email.com");
         cliente.setQtdCompras(4);
+        cliente.setDataNascimento(NASCIMENTO);
         return cliente;
     }
 
@@ -55,6 +60,7 @@ class ClienteDaoImplUnitTest {
         verify(stm).setString(7, "SP");
         verify(stm).setString(8, "joao@email.com");
         verify(stm).setInt(9, 4);
+        verify(stm).setObject(10, NASCIMENTO, Types.DATE);
     }
 
     @Test
@@ -76,8 +82,8 @@ class ClienteDaoImplUnitTest {
 
         assertEquals(7, id);
         verify(conn).prepareStatement(
-                "INSERT INTO tb_cliente (nome, cpf, tel, endereco, numero, cidade, estado, email, qtd_compras) "
-                        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO tb_cliente (nome, cpf, tel, endereco, numero, cidade, estado, email, qtd_compras, "
+                        + "data_nascimento) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS);
         verificaParametrosDoCliente(stm);
         verify(stm).close();
@@ -105,6 +111,7 @@ class ClienteDaoImplUnitTest {
         verify(stm).setObject(3, null, Types.BIGINT);
         verify(stm).setObject(5, null, Types.INTEGER);
         verify(stm).setInt(9, 0);
+        verify(stm).setObject(10, null, Types.DATE);
     }
 
     @Test
@@ -125,9 +132,9 @@ class ClienteDaoImplUnitTest {
 
         assertEquals(1, linhas);
         verify(conn).prepareStatement("UPDATE tb_cliente SET nome = ?, cpf = ?, tel = ?, endereco = ?, numero = ?, "
-                + "cidade = ?, estado = ?, email = ?, qtd_compras = ? WHERE id = ?");
+                + "cidade = ?, estado = ?, email = ?, qtd_compras = ?, data_nascimento = ? WHERE id = ?");
         verificaParametrosDoCliente(stm);
-        verify(stm).setLong(10, 3L);
+        verify(stm).setLong(11, 3L);
         verify(stm).close();
         verify(conn).close();
     }
@@ -151,6 +158,7 @@ class ClienteDaoImplUnitTest {
         when(rs.getString("estado")).thenReturn("PR");
         when(rs.getString("email")).thenReturn("cinco@email.com");
         when(rs.getInt("qtd_compras")).thenReturn(7);
+        when(rs.getObject("data_nascimento", LocalDate.class)).thenReturn(NASCIMENTO);
 
         Cliente encontrado;
         try (MockedStatic<ConnectionFactory> factory = mockStatic(ConnectionFactory.class)) {
@@ -169,6 +177,7 @@ class ClienteDaoImplUnitTest {
         assertEquals("PR", encontrado.getEstado());
         assertEquals("cinco@email.com", encontrado.getEmail());
         assertEquals(7, encontrado.getQtdCompras());
+        assertEquals(NASCIMENTO, encontrado.getDataNascimento());
         verify(conn).prepareStatement("SELECT " + COLUNAS + " FROM tb_cliente WHERE cpf = ?");
         verify(stm).setLong(1, 55555555555L);
     }

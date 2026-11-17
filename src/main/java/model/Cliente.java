@@ -1,5 +1,7 @@
 package model;
 
+import java.time.LocalDate;
+
 import anotacao.ColunaTabela;
 import anotacao.Tabela;
 import anotacao.TipoChave;
@@ -37,6 +39,9 @@ public class Cliente implements Persistente {
 
     @ColunaTabela(dbName = "qtd_compras", setJavaName = "setQtdCompras")
     private Integer qtdCompras = 0;
+
+    @ColunaTabela(dbName = "data_nascimento", setJavaName = "setDataNascimento")
+    private LocalDate dataNascimento;
 
     public String getNome() {
         return nome;
@@ -108,6 +113,14 @@ public class Cliente implements Persistente {
 
     public void setQtdCompras(Integer qtdCompras) {
         this.qtdCompras = qtdCompras;
+    }
+
+    public LocalDate getDataNascimento() {
+        return dataNascimento;
+    }
+
+    public void setDataNascimento(LocalDate dataNascimento) {
+        this.dataNascimento = dataNascimento;
     }
 
     @Override

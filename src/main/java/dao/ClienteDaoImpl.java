@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Types;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +14,8 @@ import model.Cliente;
 
 public class ClienteDaoImpl implements ClienteDAO {
 
-    private static final String COLUNAS = "id, nome, cpf, tel, endereco, numero, cidade, estado, email, qtd_compras";
+    private static final String COLUNAS =
+            "id, nome, cpf, tel, endereco, numero, cidade, estado, email, qtd_compras, data_nascimento";
 
     @Override
     public Integer cadastrar(Cliente cli) throws Exception {
@@ -43,11 +45,11 @@ public class ClienteDaoImpl implements ClienteDAO {
     }
 
     private String getSqlInsert() {
-        return "INSERT INTO tb_cliente (nome, cpf, tel, endereco, numero, cidade, estado, email, qtd_compras) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        return "INSERT INTO tb_cliente (nome, cpf, tel, endereco, numero, cidade, estado, email, qtd_compras, "
+                + "data_nascimento) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     }
 
-    /** Parâmetros 1 a 9, comuns ao INSERT e ao UPDATE. */
+    /** Parâmetros 1 a 10, comuns ao INSERT e ao UPDATE. */
     private void adicionarParametros(PreparedStatement stm, Cliente cliente) throws Exception {
         stm.setString(1, cliente.getNome());
         stm.setLong(2, cliente.getCpf());
@@ -58,6 +60,7 @@ public class ClienteDaoImpl implements ClienteDAO {
         stm.setString(7, cliente.getEstado());
         stm.setString(8, cliente.getEmail());
         stm.setInt(9, cliente.getQtdCompras());
+        stm.setObject(10, cliente.getDataNascimento(), Types.DATE);
     }
 
     @Override
@@ -69,7 +72,7 @@ public class ClienteDaoImpl implements ClienteDAO {
             conn = ConnectionFactory.getConnection();
             stm = conn.prepareStatement(getSqlUpdate());
             adicionarParametros(stm, cliente);
-            stm.setLong(10, cliente.getId());
+            stm.setLong(11, cliente.getId());
             return stm.executeUpdate();
         } finally {
             if (stm != null) {
@@ -83,7 +86,7 @@ public class ClienteDaoImpl implements ClienteDAO {
 
     private String getSqlUpdate() {
         return "UPDATE tb_cliente SET nome = ?, cpf = ?, tel = ?, endereco = ?, numero = ?, "
-                + "cidade = ?, estado = ?, email = ?, qtd_compras = ? WHERE id = ?";
+                + "cidade = ?, estado = ?, email = ?, qtd_compras = ?, data_nascimento = ? WHERE id = ?";
     }
 
     @Override
@@ -170,6 +173,7 @@ public class ClienteDaoImpl implements ClienteDAO {
         cliente.setEstado(rs.getString("estado"));
         cliente.setEmail(rs.getString("email"));
         cliente.setQtdCompras(rs.getInt("qtd_compras"));
+        cliente.setDataNascimento(rs.getObject("data_nascimento", LocalDate.class));
         return cliente;
     }
 }
